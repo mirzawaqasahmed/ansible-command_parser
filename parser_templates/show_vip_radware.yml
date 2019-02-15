@@ -1,0 +1,125 @@
+---
+- name: parser meta data
+  parser_metadata:
+    version: 1.0
+    command: show configuration
+    network_os: alteon
+
+- name: match sections
+  pattern_match:
+    regex: "\\s\\s\\d+:\\sIP4\\s(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b)"
+    match_all: yes
+    match_greedy: yes
+  register: vip_section
+  export: yes
+
+- name: match interface values
+  pattern_group:
+    - name: match VIP Instance
+      pattern_match:
+        regex: "^\\s+(\\d+):\\sIP4\\s(\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b).*"
+        content: "{{ item }}"
+      register: vip_instance
+
+    - name: match mac
+      pattern_match:
+        regex: ",\\s+(\\w+?\\.\\w+?\\.\\w+?|\\w+?\\:\\w+?\\:\\w+?\\:\\w+?\\:\\w+?\\:\\w+?)"
+        content: "{{ item }}"
+      register: vip_mac
+
+    - name: match vname
+      pattern_match:
+        regex: "vname (\\S+)"
+        content: "{{ item }}"
+      register: vname
+
+##############################################################
+
+    # - name: match virtual port
+    #   pattern_match:
+    #     regex: "\\s+(\\S+): rport"
+    #     content: "{{ item }}"
+    #   register: vport
+
+    # - name: match real port
+    #   pattern_match:
+    #     regex: " rport\\s(\\S+), group "
+    #     content: "{{ item }}"
+    #   register: rport
+
+    # - name: match virtual port group
+    #   pattern_match:
+    #     regex: " group\\s(\\d+)"
+    #     content: "{{ item }}"
+    #   register: vport_group
+
+##### The above can be expressed using below format too.
+    - name: match virtual port details
+      pattern_match:
+        regex: "\\s+(?P<vport>\\S+): rport\\s(?P<rport>\\S+) group\\s(?P<vport_group>\\d+)"
+        content: "{{ item }}"
+        match_all: yes
+      register: vport_details
+
+##############################################################
+    - name: match virtual port details
+      pattern_match:
+        regex: "\\s+(?P<vport>\\S+): rport\\s(?P<rport>\\S+) group\\s(?P<vport_group>\\d+)"
+        content: "{{ item }}"
+        match_greedy: yes
+        match_all: yes
+      register: vport_details_section
+
+    - name: match real server details
+      pattern_match:
+      # 73: LIQALL1X, backup none, 1 ms, group ena, up
+        regex: "\\s+(?P<rserver_instance>\\d+): (?P<rserver_name>\\S+), backup\\s(?P<rserver_backup>\\S+), (?P<rserver_response>\\d+) ms, group (?P<rserver_group_state>\\S+), (?P<rserver_state>\\S+)"
+        content: "{{ item }}"
+        match_all: yes
+        # match_until: "\\s+\\d+: rport"
+      register: vport_rserver_details
+
+  loop: "{{ vip_section }}"
+  register: vips_values
+  export: yes
+
+- name: export system facts to playbook
+  set_vars:
+    "{{ item.vip_instance.matches.1 }}":
+      vip_instance: "{{ item.vip_instance.matches.0 }}"
+      vip_ip: "{{ item.vip_instance.matches.1 }}"
+      vip_mac: "{{ item.vip_mac.matches.0 }}"
+      vname: "{{ item.vname.matches.0 }}"
+      virtual_ports: "{{ item.vport_details_section | rservers_filter }}"
+      # virtual_ports: "{{ item.vport_details_section }}"
+  loop: "{{ vips_values }}"
+  export: yes
+  register: vip_facts
+
+
+# - name: generate json data structure
+#   json_template:
+#     template:
+#       - key: "{{ item.vip_instance.matches.1 }}"
+#         object:
+#           - key: vip_instance
+#             value: "{{ item.vip_instance.matches.0 }}"
+#           - key: vip_ip
+#             value: "{{ item.vip_instance.matches.1 }}"
+#           - key: vip_mac
+#             value: "{{ item.vip_mac.matches.0 }}"
+#           - key: vname
+#             value: "{{ item.vname.matches.0 }}"
+#           - key: virtual_ports
+#             lines:
+#               - key: virtual_port
+#                 value: "{{ item.vport_details.vport }}"
+#               - key: rport
+#                 value: "{{ item.vport_details.rport }}"
+#               - key: group
+#                 value: "{{ item.vport_details.vport_group }}"
+#   loop: "{{ vips_values }}"
+#   export: True
+#   export_as: dict
+#   extend: radware_vips_facts
+#   register: vip_facts

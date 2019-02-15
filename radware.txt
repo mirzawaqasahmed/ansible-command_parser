@@ -1,0 +1,37 @@
+
+Virtual server state:
+  10: IP4 1.1.1.144,   00:00:5e:00:01:0a, vname SIT0-LB, NO SERVICES UP
+    virtual ports:
+    9081: rport 9081, group 1, app-9081, backup none, secbkp none, pbind cookie, rtspslb none, dbind, mirror
+    cookie persistence mode: passive
+    cookie name: jsessionid 1 64
+    find cookie in URI: disabled
+        real servers:
+           1: app02, backup none, 0 ms, group ena, FAILED
+           2: app05, backup none, 0 ms, group ena, FAILED
+  11: IP4 1.1.1.145,   00:00:5e:00:01:0b, vname SIT1-LB, NO SERVICES UP
+    virtual ports:
+    13500: rport 13500, group 2, abcdeflstpoa-13500, backup none, secbkp none, rtspslb none, mirror
+        real servers:
+           3: abcdeflstpoa01, backup none, 1 ms, group ena, FAILED
+           4: abcdeflstpoa02, backup none, 1 ms, group ena, FAILED
+       5: abcdeflstpoa03, backup none, 1 ms, group ena, FAILED
+  12: IP4 1.1.1.146,   00:00:5e:00:01:0c, vname SIT2-LB
+    virtual ports:
+    13500: rport 13500, group 3, abcdefstpoa-13500, backup none, secbkp none, rtspslb none, mirror
+        real servers:
+           6: abcdefstpoa01, backup none, 0 ms, group ena, FAILED
+           7: abcdefstpoa02, backup none, 0 ms, group ena, FAILED
+           8: abcdefstpoa03, backup none, 0 ms, group ena, up
+  13: IP4 1.1.1.147,   00:00:5e:00:01:0d, vname SIT3-LB
+    virtual ports:
+    13500: rport 13500, group 4, abcdeflstpoa-13500, backup none, secbkp none, rtspslb none, mirror
+        real servers:
+           9: abcdeflstpoa01, backup none, 2 ms, group ena, up
+          10: abcdeflstpoa02, backup none, 2 ms, group ena, up
+          11: abcdeflstpoa03, backup none, 2 ms, group ena, up
+    9200: rport 9200, group 13, abcdeflstpoa-9200, backup none, secbkp none, rtspslb none, mirror
+        real servers:
+           9: abcdeflstpoa01, backup none, 0 ms, group ena, FAILED
+          10: abcdeflstpoa02, backup none, 0 ms, group ena, FAILED
+          11: abcdeflstpoa03, backup none, 0 ms, group ena, FAILED
