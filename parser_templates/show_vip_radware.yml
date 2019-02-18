@@ -70,14 +70,14 @@
         match_all: yes
       register: vport_details_section
 
-    - name: match real server details
-      pattern_match:
-      # 73: LIQALL1X, backup none, 1 ms, group ena, up
-        regex: "\\s+(?P<rserver_instance>\\d+): (?P<rserver_name>\\S+), backup\\s(?P<rserver_backup>\\S+), (?P<rserver_response>\\d+) ms, group (?P<rserver_group_state>\\S+), (?P<rserver_state>\\S+)"
-        content: "{{ item }}"
-        match_all: yes
-        # match_until: "\\s+\\d+: rport"
-      register: vport_rserver_details
+    # - name: match real server details
+    #   pattern_match:
+    #   # 73: LIQALL1X, backup none, 1 ms, group ena, up
+    #     regex: "\\s+(?P<rserver_instance>\\d+): (?P<rserver_name>\\S+), backup\\s(?P<rserver_backup>\\S+), (?P<rserver_response>\\d+) ms, group (?P<rserver_group_state>\\S+), (?P<rserver_state>\\S+)"
+    #     content: "{{ item }}"
+    #     match_all: yes
+    #     # match_until: "\\s+\\d+: rport"
+    #   register: vport_rserver_details
 
   loop: "{{ vip_section }}"
   register: vips_values
